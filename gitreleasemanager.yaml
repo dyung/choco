@@ -4,11 +4,12 @@ issue-labels-include:
 - Feature
 - C4B Feature
 - Bug
-- Enhancement
+- Improvement
 - Documentation
+- Dependency Change
 issue-labels-exclude:
 - Internal Refactoring
-- Build
+- BuildAutomation
 - NO RELEASE NOTES
 issue-labels-alias:
     - name:    Documentation
@@ -32,6 +33,6 @@ close:
     The release is available on:
 
     - [GitHub Release](https://github.com/{owner}/{repository}/releases/tag/{milestone})
-    - [Chocolatey Package](https://chocolatey.org/packages/chocolatey/{milestone})
+    - [Chocolatey Package](https://community.chocolatey.org/packages/chocolatey/{milestone})
 
     Your **[GitReleaseManager](https://github.com/GitTools/GitReleaseManager)** bot :package::rocket:

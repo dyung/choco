@@ -24,7 +24,7 @@ namespace chocolatey.tests.infrastructure.cryptography
     using chocolatey.infrastructure.cryptography;
     using chocolatey.infrastructure.filesystem;
     using Moq;
-    using Should;
+    using FluentAssertions;
 
     public class CryptoHashProviderSpecs
     {
@@ -39,38 +39,38 @@ namespace chocolatey.tests.infrastructure.cryptography
             }
         }
 
-        public class when_HashProvider_provides_a_hash : CryptoHashProviderSpecsBase
+        public class When_HashProvider_provides_a_hash : CryptoHashProviderSpecsBase
         {
-            private string result;
-            private readonly string filePath = "c:\\path\\does\\not\\matter.txt";
-            private readonly byte[] byteArray = new byte[] { 23, 25, 27 };
+            private string _result;
+            private readonly string _filePath = "c:\\path\\does\\not\\matter.txt";
+            private readonly byte[] _byteArray = new byte[] { 23, 25, 27 };
 
             public override void Context()
             {
                 base.Context();
-                FileSystem.Setup(x => x.file_exists(It.IsAny<string>())).Returns(true);
-                FileSystem.Setup(x => x.read_file_bytes(filePath)).Returns(byteArray);
+                FileSystem.Setup(x => x.FileExists(It.IsAny<string>())).Returns(true);
+                FileSystem.Setup(x => x.ReadFileBytes(_filePath)).Returns(_byteArray);
             }
 
             public override void Because()
             {
-                result = Provider.hash_file(filePath);
+                _result = Provider.ComputeFileHash(_filePath);
             }
 
             [Fact]
-            public void should_provide_the_correct_hash_based_on_a_checksum()
+            public void Should_provide_the_correct_hash_based_on_a_checksum()
             {
-                var expected = BitConverter.ToString(SHA256.Create().ComputeHash(byteArray)).Replace("-", string.Empty);
+                var expected = BitConverter.ToString(SHA256.Create().ComputeHash(_byteArray)).Replace("-", string.Empty);
 
-                result.ShouldEqual(expected);
+                _result.Should().Be(expected);
             }
         }
 
-        public class when_HashProvider_attempts_to_provide_a_hash_for_a_file_over_2GB : CryptoHashProviderSpecsBase
+        public class When_HashProvider_attempts_to_provide_a_hash_for_a_file_over_2GB : CryptoHashProviderSpecsBase
         {
-            private string result;
-            private readonly string filePath = "c:\\path\\does\\not\\matter.txt";
-            private readonly byte[] byteArray = new byte[] { 23, 25, 27 };
+            private string _result;
+            private readonly string _filePath = "c:\\path\\does\\not\\matter.txt";
+            private readonly byte[] _byteArray = new byte[] { 23, 25, 27 };
             private readonly Mock<IHashAlgorithm> _hashAlgorithm = new Mock<IHashAlgorithm>();
 
             public override void Context()
@@ -78,32 +78,32 @@ namespace chocolatey.tests.infrastructure.cryptography
                 base.Context();
                 Provider = new CryptoHashProvider(FileSystem.Object, _hashAlgorithm.Object);
 
-                FileSystem.Setup(x => x.file_exists(It.IsAny<string>())).Returns(true);
-                FileSystem.Setup(x => x.read_file_bytes(filePath)).Returns(byteArray);
-                _hashAlgorithm.Setup(x => x.ComputeHash(byteArray)).Throws<IOException>(); //IO.IO_FileTooLong2GB (over Int32.MaxValue)
+                FileSystem.Setup(x => x.FileExists(It.IsAny<string>())).Returns(true);
+                FileSystem.Setup(x => x.ReadFileBytes(_filePath)).Returns(_byteArray);
+                _hashAlgorithm.Setup(x => x.ComputeHash(_byteArray)).Throws<IOException>(); //IO.IO_FileTooLong2GB (over Int32.MaxValue)
             }
 
             public override void Because()
             {
-                result = Provider.hash_file(filePath);
+                _result = Provider.ComputeFileHash(_filePath);
             }
 
             [Fact]
-            public void should_log_a_warning()
+            public void Should_log_a_warning()
             {
-                MockLogger.MessagesFor(LogLevel.Warn).Count.ShouldEqual(1);
+                MockLogger.MessagesFor(LogLevel.Warn).Should().HaveCount(1);
             }
 
             [Fact]
-            public void should_not_throw_an_error_itself()
+            public void Should_not_throw_an_error_itself()
             {
                 //this handles itself
             }
 
             [Fact]
-            public void should_provide_an_unchanging_hash_for_a_file_too_big_to_hash()
+            public void Should_provide_an_unchanging_hash_for_a_file_too_big_to_hash()
             {
-                result.ShouldEqual(ApplicationParameters.HashProviderFileTooBig);
+                _result.Should().Be(ApplicationParameters.HashProviderFileTooBig);
             }
         }
     }

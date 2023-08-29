@@ -5,6 +5,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.Dependencies
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.pullRequests
 import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.finishBuildTrigger
+import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.schedule
 import jetbrains.buildServer.configs.kotlin.v2019_2.vcs.GitVcsRoot
 
 project {
@@ -57,13 +58,27 @@ object Chocolatey : BuildType({
 
         script {
             name = "Call Cake"
-            scriptContent = "call build.official.bat --verbosity=diagnostic --target=CI --testExecutionType=all --shouldRunOpenCover=false"
+            scriptContent = """
+                IF "%teamcity.build.triggeredBy%" == "Schedule Trigger" (SET TestType=all) ELSE (SET TestType=unit)
+                call build.official.bat --verbosity=diagnostic --target=CI --testExecutionType=%%TestType%% --shouldRunOpenCover=false
+            """.trimIndent()
         }
     }
 
     triggers {
         vcs {
             branchFilter = ""
+        }
+        schedule {
+            schedulingPolicy = daily {
+                hour = 2
+                minute = 0
+            }
+            branchFilter = """
+                +:<default>
+            """.trimIndent()
+            triggerBuild = always()
+			withPendingChangesOnly = false
         }
     }
 
@@ -92,6 +107,8 @@ object ChocolateyDockerWin : BuildType({
         param("env.vcsroot.branch", "%vcsroot.branch%")
         param("env.Git_Branch", "%teamcity.build.vcs.branch.Chocolatey_ChocolateyVcsRoot%")
         param("teamcity.git.fetchAllHeads", "true")
+        password("env.DOCKER_USER", "%system.DockerUsername%", display = ParameterDisplay.HIDDEN, readOnly = true)
+        password("env.DOCKER_PASSWORD", "%system.DockerPassword%", display = ParameterDisplay.HIDDEN, readOnly = true)
     }
 
     vcs {
@@ -140,12 +157,15 @@ object ChocolateyPosix : BuildType({
 
     params {
         param("env.CAKE_NUGET_SOURCE", "") // The Cake version we use has issues with authing to our private source on Linux
+        param("env.PRIMARY_NUGET_SOURCE", "") // As above there are issues with authing to our private source on Linux
         param("env.CHOCOLATEY_VERSION", "%dep.Chocolatey.build.number%")
         param("env.CHOCOLATEY_OFFICIAL_KEY", "%system.teamcity.build.checkoutDir%/chocolatey.official.snk")
         password("env.GITHUB_PAT", "%system.GitHubPAT%", display = ParameterDisplay.HIDDEN, readOnly = true)
         param("env.vcsroot.branch", "%vcsroot.branch%")
         param("env.Git_Branch", "%teamcity.build.vcs.branch.Chocolatey_ChocolateyVcsRoot%")
         param("teamcity.git.fetchAllHeads", "true")
+        password("env.DOCKER_USER", "%system.DockerUsername%", display = ParameterDisplay.HIDDEN, readOnly = true)
+        password("env.DOCKER_PASSWORD", "%system.DockerPassword%", display = ParameterDisplay.HIDDEN, readOnly = true)
     }
 
     vcs {

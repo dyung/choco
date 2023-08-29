@@ -32,7 +32,7 @@ namespace chocolatey.tests
     {
         public static MockLogger MockLogger { get; set; }
 
-        private static readonly string InstallLocationVariable = Environment.GetEnvironmentVariable(ApplicationParameters.ChocolateyInstallEnvironmentVariableName);
+        private static readonly string _installLocationVariable = Environment.GetEnvironmentVariable(ApplicationParameters.ChocolateyInstallEnvironmentVariableName);
 
         [OneTimeSetUp]
         public virtual void BeforeEverything()
@@ -45,14 +45,10 @@ namespace chocolatey.tests
             Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
         }
 
-        public virtual void before_everything()
-        {
-        }
-
         [OneTimeTearDown]
         public void AfterEverything()
         {
-            Environment.SetEnvironmentVariable(ApplicationParameters.ChocolateyInstallEnvironmentVariableName, InstallLocationVariable);
+            Environment.SetEnvironmentVariable(ApplicationParameters.ChocolateyInstallEnvironmentVariableName, _installLocationVariable);
         }
     }
 
@@ -67,7 +63,7 @@ namespace chocolatey.tests
         [OneTimeSetUp]
         public void Setup()
         {
-            if (MockLogger != null) MockLogger.reset();
+            if (MockLogger != null) MockLogger.Reset();
             //Log.InitializeWith(MockLogger);
             NugetCommon.ClearRepositoriesCache();
             Context();
@@ -117,6 +113,15 @@ namespace chocolatey.tests
     {
     }
 
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class InlineDataAttribute : TestCaseAttribute
+    {
+        public InlineDataAttribute(params object[] data)
+            : base(data)
+        {
+        }
+    }
+
     public class ExplicitAttribute : NUnit.Framework.ExplicitAttribute
     {
     }
@@ -125,7 +130,7 @@ namespace chocolatey.tests
     public class ConcernForAttribute : CategoryAttribute
     {
         public ConcernForAttribute(string name)
-            : base("ConcernFor - {0}".format_with(name))
+            : base("ConcernFor - {0}".FormatWith(name))
         {
         }
     }
@@ -144,7 +149,7 @@ namespace chocolatey.tests
     public class PendingAttribute : IgnoreAttribute
     {
         public PendingAttribute(string reason)
-            : base("Pending test - {0}".format_with(reason))
+            : base("Pending test - {0}".FormatWith(reason))
         {
         }
     }
@@ -186,6 +191,15 @@ namespace chocolatey.tests
         {
             public SemVer20Attribute()
                 : base("SemVer 2.0")
+            {
+            }
+        }
+
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
+        public sealed class RuleEngine : CategoryAttribute
+        {
+            public RuleEngine()
+                : base("Rule Engine")
             {
             }
         }

@@ -17,33 +17,33 @@
 namespace chocolatey.tests.infrastructure.app.attributes
 {
     using chocolatey.infrastructure.app.attributes;
-    using Should;
+    using FluentAssertions;
 
     public class CommandForAttributeSpecs
     {
         public abstract class CommandForAttributeSpecsBase : TinySpec
         {
-            protected CommandForAttribute attribute;
+            protected CommandForAttribute Attribute;
         }
 
-        public class when_CommandForAttribute_is_set_with_string : CommandForAttributeSpecsBase
+        public class When_CommandForAttribute_is_set_with_string : CommandForAttributeSpecsBase
         {
-            private string result;
+            private string _result;
 
             public override void Context()
             {
-                attribute = new CommandForAttribute("bob", "");
+                Attribute = new CommandForAttribute("bob", "");
             }
 
             public override void Because()
             {
-                result = attribute.CommandName;
+                _result = Attribute.CommandName;
             }
 
             [Fact]
-            public void should_be_set_to_the_string()
+            public void Should_be_set_to_the_string()
             {
-                result.ShouldEqual("bob");
+                _result.Should().Be("bob");
             }
         }
     }

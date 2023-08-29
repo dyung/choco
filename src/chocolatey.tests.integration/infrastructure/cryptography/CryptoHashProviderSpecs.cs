@@ -21,7 +21,7 @@ namespace chocolatey.tests.integration.infrastructure.cryptography
     using System.Security.Cryptography;
     using chocolatey.infrastructure.cryptography;
     using chocolatey.infrastructure.filesystem;
-    using Should;
+    using FluentAssertions;
 
     public class CryptoHashProviderSpecs
     {
@@ -35,32 +35,32 @@ namespace chocolatey.tests.integration.infrastructure.cryptography
             {
                 FileSystem = new DotNetFileSystem();
                 Provider = new CryptoHashProvider(FileSystem);
-                ContextDirectory = FileSystem.combine_paths(FileSystem.get_directory_name(FileSystem.get_current_assembly_path()), "context");
+                ContextDirectory = FileSystem.CombinePaths(FileSystem.GetDirectoryName(FileSystem.GetCurrentAssemblyPath()), "context");
             }
         }
 
-        public class when_HashProvider_provides_a_hash : CryptoHashProviderSpecsBase
+        public class When_HashProvider_provides_a_hash : CryptoHashProviderSpecsBase
         {
-            private string result;
-            private string filePath;
+            private string _result;
+            private string _filePath;
 
             public override void Context()
             {
                 base.Context();
-                filePath = FileSystem.combine_paths(ContextDirectory, "testing.packages.config");
+                _filePath = FileSystem.CombinePaths(ContextDirectory, "testing.packages.config");
             }
 
             public override void Because()
             {
-                result = Provider.hash_file(filePath);
+                _result = Provider.ComputeFileHash(_filePath);
             }
 
             [Fact]
-            public void should_provide_the_correct_hash_based_on_a_checksum()
+            public void Should_provide_the_correct_hash_based_on_a_checksum()
             {
-                var expected = BitConverter.ToString(SHA256.Create().ComputeHash(File.ReadAllBytes(filePath))).Replace("-", string.Empty);
+                var expected = BitConverter.ToString(SHA256.Create().ComputeHash(File.ReadAllBytes(_filePath))).Replace("-", string.Empty);
 
-                result.ShouldEqual(expected);
+                _result.Should().Be(expected);
             }
         }
     }

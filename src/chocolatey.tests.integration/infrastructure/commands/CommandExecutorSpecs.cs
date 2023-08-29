@@ -21,27 +21,27 @@ namespace chocolatey.tests.integration.infrastructure.commands
     using chocolatey.infrastructure.commands;
     using chocolatey.infrastructure.filesystem;
     using NUnit.Framework;
-    using Should;
+    using FluentAssertions;
 
     public class CommandExecutorSpecs
     {
         public abstract class CommandExecutorSpecsBase : TinySpec
         {
-            protected readonly IFileSystem fileSystem = new DotNetFileSystem();
-            protected CommandExecutor commandExecutor;
+            protected readonly IFileSystem FileSystem = new DotNetFileSystem();
+            protected CommandExecutor CommandExecutor;
 
             public override void Context()
             {
-                commandExecutor = new CommandExecutor(fileSystem);
+                CommandExecutor = new CommandExecutor(FileSystem);
             }
         }
 
         [WindowsOnly]
         [Platform(Exclude = "Mono")]
-        public class when_CommandExecutor_errors : CommandExecutorSpecsBase
+        public class When_CommandExecutor_errors : CommandExecutorSpecsBase
         {
-            private int result;
-            private string errorOutput;
+            private int _result;
+            private string _errorOutput;
 
             public override void Context()
             {
@@ -50,59 +50,59 @@ namespace chocolatey.tests.integration.infrastructure.commands
 
             public override void Because()
             {
-                result = commandExecutor.execute(
+                _result = CommandExecutor.Execute(
                     "cmd.exe",
                     "/c bob123123",
                     ApplicationParameters.DefaultWaitForExitInSeconds,
-                    fileSystem.get_current_directory(),
+                    FileSystem.GetCurrentDirectory(),
                     null,
-                    (s, e) => { errorOutput += e.Data; },
+                    (s, e) => { _errorOutput += e.Data; },
                     updateProcessPath: false,
                     allowUseWindow: false);
             }
 
             [Fact]
-            public void should_not_return_an_exit_code_of_zero()
+            public void Should_not_return_an_exit_code_of_zero()
             {
-                result.ShouldNotEqual(0);
+                _result.Should().NotBe(0);
             }
 
             [Fact]
-            public void should_contain_error_output()
+            public void Should_contain_error_output()
             {
-                errorOutput.ShouldNotBeNull();
+                _errorOutput.Should().NotBeNull();
             }
 
             [Fact]
-            public void should_message_the_error()
+            public void Should_message_the_error()
             {
-                errorOutput.ShouldEqual("'bob123123' is not recognized as an internal or external command,operable program or batch file.");
+                _errorOutput.Should().Be("'bob123123' is not recognized as an internal or external command,operable program or batch file.");
             }
         }
 
         [WindowsOnly]
         [Platform(Exclude = "Mono")]
-        public class when_CommandExecutor_is_given_a_nonexisting_process : CommandExecutorSpecsBase
+        public class When_CommandExecutor_is_given_a_nonexisting_process : CommandExecutorSpecsBase
         {
-            private string result;
-            private string errorOutput;
+            private string _result;
+            private string _errorOutput;
 
             public override void Because()
             {
                 try
                 {
-                    commandExecutor.execute("noprocess.exe", "/c bob123123", ApplicationParameters.DefaultWaitForExitInSeconds, null, (s, e) => { errorOutput += e.Data; });
+                    CommandExecutor.Execute("noprocess.exe", "/c bob123123", ApplicationParameters.DefaultWaitForExitInSeconds, null, (s, e) => { _errorOutput += e.Data; });
                 }
                 catch (Exception e)
                 {
-                    result = e.Message;
+                    _result = e.Message;
                 }
             }
 
             [Fact]
-            public void should_have_an_error_message()
+            public void Should_have_an_error_message()
             {
-                result.ShouldNotBeNull();
+                _result.Should().NotBeNull();
             }
         }
     }

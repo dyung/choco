@@ -25,363 +25,363 @@ namespace chocolatey.tests.infrastructure.app.commands
     using chocolatey.infrastructure.app.services;
     using chocolatey.infrastructure.commandline;
     using Moq;
-    using Should;
+    using FluentAssertions;
 
     public class ChocolateySearchCommandSpecs
     {
         [ConcernFor("search")]
         public abstract class ChocolateySearchCommandSpecsBase : TinySpec
         {
-            protected ChocolateySearchCommand command;
-            protected Mock<IChocolateyPackageService> packageService = new Mock<IChocolateyPackageService>();
-            protected ChocolateyConfiguration configuration = new ChocolateyConfiguration();
+            protected ChocolateySearchCommand Command;
+            protected Mock<IChocolateyPackageService> PackageService = new Mock<IChocolateyPackageService>();
+            protected ChocolateyConfiguration Configuration = new ChocolateyConfiguration();
 
             public override void Context()
             {
-                configuration.Sources = "bob";
-                command = new ChocolateySearchCommand(packageService.Object);
+                Configuration.Sources = "bob";
+                Command = new ChocolateySearchCommand(PackageService.Object);
             }
         }
 
-        public class when_implementing_command_for : ChocolateySearchCommandSpecsBase
+        public class When_implementing_command_for : ChocolateySearchCommandSpecsBase
         {
-            private List<string> results;
+            private List<string> _results;
 
             public override void Because()
             {
-                results = command.GetType().GetCustomAttributes(typeof(CommandForAttribute), false).Cast<CommandForAttribute>().Select(a => a.CommandName).ToList();
+                _results = Command.GetType().GetCustomAttributes(typeof(CommandForAttribute), false).Cast<CommandForAttribute>().Select(a => a.CommandName).ToList();
             }
 
             [Fact]
-            public void should_not_implement_list()
+            public void Should_not_implement_list()
             {
-                results.ShouldNotContain("list");
+                _results.Should().NotContain("list");
             }
 
             [Fact]
-            public void should_implement_search()
+            public void Should_implement_search()
             {
-                results.ShouldContain("search");
+                _results.Should().Contain("search");
             }
 
             [Fact]
-            public void should_implement_find()
+            public void Should_implement_find()
             {
-                results.ShouldContain("find");
+                _results.Should().Contain("find");
             }
         }
 
-        public class when_configurating_the_argument_parser_for_search_command : ChocolateySearchCommandSpecsBase
+        public class When_configurating_the_argument_parser_for_search_command : ChocolateySearchCommandSpecsBase
         {
-            private OptionSet optionSet;
+            private OptionSet _optionSet;
 
             public override void Context()
             {
                 base.Context();
-                optionSet = new OptionSet();
-                configuration.CommandName = "search";
+                _optionSet = new OptionSet();
+                Configuration.CommandName = "search";
             }
 
             public override void Because()
             {
-                command.configure_argument_parser(optionSet, configuration);
+                Command.ConfigureArgumentParser(_optionSet, Configuration);
             }
 
             [Fact]
-            public void should_add_source_to_the_option_set()
+            public void Should_add_source_to_the_option_set()
             {
-                optionSet.Contains("source").ShouldBeTrue();
+                _optionSet.Contains("source").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_short_version_of_source_to_the_option_set()
+            public void Should_add_short_version_of_source_to_the_option_set()
             {
-                optionSet.Contains("s").ShouldBeTrue();
+                _optionSet.Contains("s").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_prerelease_to_the_option_set()
+            public void Should_add_prerelease_to_the_option_set()
             {
-                optionSet.Contains("prerelease").ShouldBeTrue();
+                _optionSet.Contains("prerelease").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_short_version_of_prerelease_to_the_option_set()
+            public void Should_add_short_version_of_prerelease_to_the_option_set()
             {
-                optionSet.Contains("pre").ShouldBeTrue();
+                _optionSet.Contains("pre").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_includeprograms_to_the_option_set()
+            public void Should_add_includeprograms_to_the_option_set()
             {
-                optionSet.Contains("includeprograms").ShouldBeTrue();
+                _optionSet.Contains("includeprograms").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_short_version_of_includeprograms_to_the_option_set()
+            public void Should_add_short_version_of_includeprograms_to_the_option_set()
             {
-                optionSet.Contains("i").ShouldBeTrue();
+                _optionSet.Contains("i").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_allversions_to_the_option_set()
+            public void Should_add_allversions_to_the_option_set()
             {
-                optionSet.Contains("allversions").ShouldBeTrue();
+                _optionSet.Contains("allversions").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_short_version_of_allversions_to_the_option_set()
+            public void Should_add_short_version_of_allversions_to_the_option_set()
             {
-                optionSet.Contains("a").ShouldBeTrue();
+                _optionSet.Contains("a").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_user_to_the_option_set()
+            public void Should_add_user_to_the_option_set()
             {
-                optionSet.Contains("user").ShouldBeTrue();
+                _optionSet.Contains("user").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_short_version_of_user_to_the_option_set()
+            public void Should_add_short_version_of_user_to_the_option_set()
             {
-                optionSet.Contains("u").ShouldBeTrue();
+                _optionSet.Contains("u").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_password_to_the_option_set()
+            public void Should_add_password_to_the_option_set()
             {
-                optionSet.Contains("password").ShouldBeTrue();
+                _optionSet.Contains("password").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_short_version_of_password_to_the_option_set()
+            public void Should_add_short_version_of_password_to_the_option_set()
             {
-                optionSet.Contains("p").ShouldBeTrue();
+                _optionSet.Contains("p").Should().BeTrue();
             }
         }
 
         [NUnit.Framework.TestFixture("search")]
         [NUnit.Framework.TestFixture("find")]
-        public class when_configurating_the_argument_parser : ChocolateySearchCommandSpecsBase
+        public class When_configurating_the_argument_parser : ChocolateySearchCommandSpecsBase
         {
-            private OptionSet optionSet;
+            private OptionSet _optionSet;
 
-            public when_configurating_the_argument_parser(string commandName)
+            public When_configurating_the_argument_parser(string commandName)
             {
-                configuration.CommandName = commandName;
+                Configuration.CommandName = commandName;
             }
 
             public override void Context()
             {
                 base.Context();
-                optionSet = new OptionSet();
+                _optionSet = new OptionSet();
             }
 
             public override void Because()
             {
-                command.configure_argument_parser(optionSet, configuration);
+                Command.ConfigureArgumentParser(_optionSet, Configuration);
             }
 
             [Fact]
-            public void should_add_source_to_the_option_set()
+            public void Should_add_source_to_the_option_set()
             {
-                optionSet.Contains("source").ShouldBeTrue();
+                _optionSet.Contains("source").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_short_version_of_source_to_the_option_set()
+            public void Should_add_short_version_of_source_to_the_option_set()
             {
-                optionSet.Contains("s").ShouldBeTrue();
+                _optionSet.Contains("s").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_prerelease_to_the_option_set()
+            public void Should_add_prerelease_to_the_option_set()
             {
-                optionSet.Contains("prerelease").ShouldBeTrue();
+                _optionSet.Contains("prerelease").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_short_version_of_prerelease_to_the_option_set()
+            public void Should_add_short_version_of_prerelease_to_the_option_set()
             {
-                optionSet.Contains("pre").ShouldBeTrue();
+                _optionSet.Contains("pre").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_includeprograms_to_the_option_set()
+            public void Should_add_includeprograms_to_the_option_set()
             {
-                optionSet.Contains("includeprograms").ShouldBeTrue();
+                _optionSet.Contains("includeprograms").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_short_version_of_includeprograms_to_the_option_set()
+            public void Should_add_short_version_of_includeprograms_to_the_option_set()
             {
-                optionSet.Contains("i").ShouldBeTrue();
+                _optionSet.Contains("i").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_allversions_to_the_option_set()
+            public void Should_add_allversions_to_the_option_set()
             {
-                optionSet.Contains("allversions").ShouldBeTrue();
+                _optionSet.Contains("allversions").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_short_version_of_allversions_to_the_option_set()
+            public void Should_add_short_version_of_allversions_to_the_option_set()
             {
-                optionSet.Contains("a").ShouldBeTrue();
+                _optionSet.Contains("a").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_user_to_the_option_set()
+            public void Should_add_user_to_the_option_set()
             {
-                optionSet.Contains("user").ShouldBeTrue();
+                _optionSet.Contains("user").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_short_version_of_user_to_the_option_set()
+            public void Should_add_short_version_of_user_to_the_option_set()
             {
-                optionSet.Contains("u").ShouldBeTrue();
+                _optionSet.Contains("u").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_password_to_the_option_set()
+            public void Should_add_password_to_the_option_set()
             {
-                optionSet.Contains("password").ShouldBeTrue();
+                _optionSet.Contains("password").Should().BeTrue();
             }
 
             [Fact]
-            public void should_add_short_version_of_password_to_the_option_set()
+            public void Should_add_short_version_of_password_to_the_option_set()
             {
-                optionSet.Contains("p").ShouldBeTrue();
+                _optionSet.Contains("p").Should().BeTrue();
             }
         }
 
-        public class when_handling_additional_argument_parsing : ChocolateySearchCommandSpecsBase
+        public class When_handling_additional_argument_parsing : ChocolateySearchCommandSpecsBase
         {
-            private readonly IList<string> unparsedArgs = new List<string>();
-            private readonly string source = "https://somewhereoutthere";
-            private Action because;
+            private readonly IList<string> _unparsedArgs = new List<string>();
+            private readonly string _source = "https://somewhereoutthere";
+            private Action _because;
 
             public override void Context()
             {
                 base.Context();
-                unparsedArgs.Add("pkg1");
-                unparsedArgs.Add("pkg2");
-                configuration.Sources = source;
+                _unparsedArgs.Add("pkg1");
+                _unparsedArgs.Add("pkg2");
+                Configuration.Sources = _source;
             }
 
             public override void Because()
             {
-                because = () => command.handle_additional_argument_parsing(unparsedArgs, configuration);
+                _because = () => Command.ParseAdditionalArguments(_unparsedArgs, Configuration);
             }
 
             [Fact]
-            public void should_set_unparsed_arguments_to_configuration_input()
+            public void Should_set_unparsed_arguments_to_configuration_input()
             {
-                because();
-                configuration.Input.ShouldEqual("pkg1 pkg2");
+                _because();
+                Configuration.Input.Should().Be("pkg1 pkg2");
             }
 
             [Fact]
-            public void should_leave_source_as_set()
+            public void Should_leave_source_as_set()
             {
-                configuration.ListCommand.LocalOnly = false;
-                because();
-                configuration.Sources.ShouldEqual(source);
+                Configuration.ListCommand.LocalOnly = false;
+                _because();
+                Configuration.Sources.Should().Be(_source);
             }
         }
 
-        public class when_noop_is_called_with_search_command : ChocolateySearchCommandSpecsBase
+        public class When_noop_is_called_with_search_command : ChocolateySearchCommandSpecsBase
         {
             public override void Context()
             {
                 base.Context();
-                configuration.CommandName = "search";
+                Configuration.CommandName = "search";
             }
 
             public override void Because()
             {
-                command.noop(configuration);
+                Command.DryRun(Configuration);
             }
 
             [Fact]
-            public void should_call_service_list_noop()
+            public void Should_call_service_list_noop()
             {
-                packageService.Verify(c => c.list_noop(configuration), Times.Once);
+                PackageService.Verify(c => c.ListDryRun(Configuration), Times.Once);
             }
         }
 
-        public class when_noop_is_called : ChocolateySearchCommandSpecsBase
+        public class When_noop_is_called : ChocolateySearchCommandSpecsBase
         {
             public override void Because()
             {
-                command.noop(configuration);
+                Command.DryRun(Configuration);
             }
 
             [Fact]
-            public void should_call_service_list_noop()
+            public void Should_call_service_list_noop()
             {
-                packageService.Verify(c => c.list_noop(configuration), Times.Once);
+                PackageService.Verify(c => c.ListDryRun(Configuration), Times.Once);
             }
 
             [Fact]
-            public void should_not_report_any_warning_messages()
+            public void Should_not_report_any_warning_messages()
             {
-                MockLogger.Messages.Keys.ShouldNotContain("Warn");
+                MockLogger.Messages.Keys.Should().NotContain("Warn");
             }
         }
 
-        public class when_run_is_called_with_search_command : ChocolateySearchCommandSpecsBase
+        public class When_run_is_called_with_search_command : ChocolateySearchCommandSpecsBase
         {
             public override void Context()
             {
                 base.Context();
-                configuration.CommandName = "search";
+                Configuration.CommandName = "search";
             }
 
             public override void Because()
             {
-                command.run(configuration);
+                Command.Run(Configuration);
             }
 
             [Fact]
-            public void should_call_service_list_run()
+            public void Should_call_service_list_run()
             {
-                packageService.Verify(c => c.list_run(configuration), Times.Once);
+                PackageService.Verify(c => c.List(Configuration), Times.Once);
             }
         }
 
-        public class when_run_is_called : ChocolateySearchCommandSpecsBase
+        public class When_run_is_called : ChocolateySearchCommandSpecsBase
         {
             public override void Because()
             {
-                command.run(configuration);
+                Command.Run(Configuration);
             }
 
             [Fact]
-            public void should_call_service_list_run()
+            public void Should_call_service_list_run()
             {
-                packageService.Verify(c => c.list_run(configuration), Times.Once);
+                PackageService.Verify(c => c.List(Configuration), Times.Once);
             }
 
             [Fact]
-            public void should_not_report_any_warning_messages()
+            public void Should_not_report_any_warning_messages()
             {
-                MockLogger.Messages.Keys.ShouldNotContain("Warn");
+                MockLogger.Messages.Keys.Should().NotContain("Warn");
             }
         }
 
         [NUnit.Framework.TestFixture("search")]
         [NUnit.Framework.TestFixture("find")]
-        public class when_outputting_help_message : ChocolateySearchCommandSpecsBase
+        public class When_outputting_help_message : ChocolateySearchCommandSpecsBase
         {
-            public when_outputting_help_message(string commandName)
+            public When_outputting_help_message(string commandName)
             {
-                configuration.CommandName = commandName;
+                Configuration.CommandName = commandName;
             }
 
             public override void Because()
             {
-                command.help_message(configuration);
+                Command.HelpMessage(Configuration);
             }
         }
     }
